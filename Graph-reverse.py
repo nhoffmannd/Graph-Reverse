@@ -1,10 +1,12 @@
-from PyQt5.QtWidgets import (QMainWindow, QAction, QApplication)
-from PyQt5.QtWidgets import (QTextEdit, QFileDialog)
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMainWindow, QAction, QApplication, QWidget
+from PyQt5.QtWidgets import QTextEdit, QFileDialog, QLabel, QVBoxLayout
+from PyQt5.QtGui import QIcon, QPixmap
 from GraphReverseDefinitions import new_function
+from scipy import misc
+from matplotlib import pyplot as plt
 import sys
-import matplotlib.pyplot as plt
-import numpy as np
+import PIL
+import numpy
 
 class Example(QMainWindow):
     ##Esto es estándar de PyQt5.
@@ -14,30 +16,38 @@ class Example(QMainWindow):
 
     ##Aquí se controla la ventana obtenida.
     def initUI(self):      
-        self.textEdit = QTextEdit()
-        self.setCentralWidget(self.textEdit)
         self.statusBar()
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
 
+        ##Una caja de texto.
+        self.label = QTextEdit()
+        self.setCentralWidget(self.label)
+
         ##Definimos funciones mas sencillamente.        
-        openFile = new_function('web.png', 'Open', 'Ctrl+O', 'Abre', self, fileMenu)
+        openFile    = new_function('web.png', 'Open', 'Ctrl+O', 'Abre', self, fileMenu)
+        exitProgram = new_function('web.png','Cerrar','Ctrl+X', 'Exit', self, fileMenu)
         openFile.triggered.connect(self.open_file)
-        exitProgram = new_function('web.png','Cerrar','Ctrl+X','Exit', self, fileMenu)
         exitProgram.triggered.connect(self.salir)
 
         ##Esta es la ventana que sale.
-        self.setGeometry(300, 300, 350, 300)
         self.setWindowTitle('Graph Reverser')
         self.show()
 
+    def salir(self):
+        sys.exit()
+        ##Las funciones más sencillas primero.
+
     def open_file(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file', "", "Image Files (*.jpg, *.bmp, *.png)")
-        self.textEdit.setText(fname[0])
+        workfile = misc.imread('face.png')
+        mi = workfile.shape[1]
+        histogram = numpy.full((mi,1),0)
+        ##ESTO ANDA
+        for a in range (0, mi):
+            histogram(a, 1) = workfile[]
+        
 
-    def salir(self):
-        self.textEdit.setText("jaja.")
-        sys.exit()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
