@@ -48,25 +48,32 @@ class Example(QMainWindow):
         for a in range (0, col):
             for b in range (0, row):
                 histogram[a]=histogram[a]+max(workfile[a][b][:])
-
         vid = int(col/2)
-        histmin = min(histogram[0:vid])
-        left = 0
+        
+        histmin_left = min(histogram[0:vid])
+        histmin_right =min(histogram[vid+1:col])
+        left = -1
+        right = -1
         for a in range (0, vid):
-            if ((abs(histmin/histogram[a])>0.95) and (abs(histmin/histogram[a])<1.05)):
-                left = a
-                break
+            onerow = a
+            tworow = col - a - 1
+            if ((abs(histmin_left/histogram[onerow])>0.95) and (abs(histmin_left/histogram[onerow])<1.05) and (left == -1)):
+                left = onerow
+            if ((abs(histmin_right/histogram[tworow])>0.95) and (abs(histmin_right/histogram[tworow])<1.05) and (right == -1)):
+                right = tworow
+        print (str(left) + ' left, right ' + str(right))
 
-        histmin = min(histogram[vid:col])
-        right = col
-        for a in range (vid, col):
-            print(a)
-##            if ((abs(histmin/histogram[a])>0.95) and (abs(histmin/histogram[a])<1.05)):
-##                right = a
+##        histmin = min(histogram[vid:col])
+##        right = col
+##        for a in range (0, vid):
+##            b = col - a
+##            if ((abs(histmin/histogram[b])>0.95) and (abs(histmin/histogram[b])<1.05)):
+##                print(a)
 ##                break
+##                b=0
             
-        print (left)
-        print (right)
+##        print (left)
+##        print (right)
             
 
 if __name__ == '__main__':
