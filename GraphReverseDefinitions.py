@@ -63,13 +63,13 @@ def graph_limits(graph):
         right_col = columns - a - 1
         percentage_left = abs(minimum_left/clpsd_columns[left_col])
         percentage_right = abs(minimum_right/clpsd_columns[right_col])
-        if percentage_left<1.05&&percentage_left>1.05&&continue_left:
+        if percentage_left<1.05&&percentage_left>1.05&&cont_left:
             left_position = left_col
-            continue_left = False
-        if percentage_right<1.05&&percentage_right>1.05&&continue_right:
+            cont_left = False
+        if percentage_right<1.05&&percentage_right>1.05&&cont_right:
             right_position = right_col
-            continue_right = False
-        if (!continue_left && !continue_right):
+            cont_right = False
+        if (!cont_left && !cont_right):
             break
 
     ##Repetir para las filas.
@@ -80,11 +80,11 @@ def graph_limits(graph):
         percentage_bottom = abs(minimum_bottom/clpsd_rows[bottom_row])
         if percentage_top<1.05&&percentage_top>1.05&&cont_top:
             top_position = top_row
-            continue_top = False
+            cont_top = False
         if percentage_bottom<1.05&&percentage_bottom>1.05&&cont_bottom:
             bottom_position = bottom_row
-            continue_bottom = False
-        if (!continue_top && !continue_bottom):
+            cont_bottom = False
+        if (!cont_top && !cont_bottom):
             break
 
     ##Devolver los límites.
