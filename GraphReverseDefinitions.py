@@ -25,18 +25,18 @@ def new_function(ICON, NOMBRE, TECL, DESC, OBJ, MENU):
 def graph_limits(graph):
     import PIL
     import numpy
-    columns = graph.shape[0]
-    rows = graph.shape[1]
+    columns = graph.shape[1]
+    rows = graph.shape[0]
     clpsd_columns   = numpy.full((columns),0)
     clpsd_rows      = numpy.full((rows),0)
     
     for a in range (0, columns):
         for b in range (0, rows):
-            clpsd_columns[a] = clpsd_columns[a]+max(graph[a][b][:])
+            clpsd_columns[a] = clpsd_columns[a]+max(graph[b][a][:])
 
     for a in range (0, rows):
         for b in range (0, columns):
-            clpsd_rows[a] = clpsd_rows[a]+max(graph[b][a][:])
+            clpsd_rows[a] = clpsd_rows[a]+max(graph[a][b][:])
             
     half_cols = int(columns/2)
     half_rows = int(rows/2)
@@ -63,13 +63,13 @@ def graph_limits(graph):
         right_col = columns - a - 1
         percentage_left = abs(minimum_left/clpsd_columns[left_col])
         percentage_right = abs(minimum_right/clpsd_columns[right_col])
-        if percentage_left<1.05&&percentage_left>1.05&&cont_left:
-            left_position = left_col
+        if percentage_left<1.05 and percentage_left>0.95 and cont_left:
+            left_pos = left_col
             cont_left = False
-        if percentage_right<1.05&&percentage_right>1.05&&cont_right:
-            right_position = right_col
+        if percentage_right<1.05 and percentage_right>0.95 and cont_right:
+            right_pos = right_col
             cont_right = False
-        if (!cont_left && !cont_right):
+        if not (cont_left or cont_right):
             break
 
     ##Repetir para las filas.
@@ -78,13 +78,13 @@ def graph_limits(graph):
         bottom_row = rows - a - 1
         percentage_top = abs(minimum_top/clpsd_rows[top_row])
         percentage_bottom = abs(minimum_bottom/clpsd_rows[bottom_row])
-        if percentage_top<1.05&&percentage_top>1.05&&cont_top:
-            top_position = top_row
+        if percentage_top<1.05 and percentage_top>0.95 and cont_top:
+            top_pos = top_row
             cont_top = False
-        if percentage_bottom<1.05&&percentage_bottom>1.05&&cont_bottom:
-            bottom_position = bottom_row
+        if percentage_bottom<1.05 and percentage_bottom>0.95 and cont_bottom:
+            bottom_pos = bottom_row
             cont_bottom = False
-        if (!cont_top && !cont_bottom):
+        if not (cont_top or cont_bottom):
             break
 
     ##Devolver los límites.
