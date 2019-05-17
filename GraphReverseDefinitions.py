@@ -90,3 +90,56 @@ def graph_limits(graph):
     ##Devolver los límites.
     limits=[left_pos, top_pos, right_pos, bottom_pos]
     return limits
+
+def find_ticks (graph, limits):
+
+    left_limit  =   limits[1]
+    top_limit   =   limits[2]
+    right_limit =   limits[3]
+    bottom_limit=   limits[4]
+
+    rows        =   graph.shape[0]
+    columns     =   graph.shape[1]
+    margin      =   5
+    
+    left_limit  =   max(left_limit-margin, 0)
+    right_limit =   min(right_limit+margin, columns)
+    top_limit   =   max(top_limit-margin, 0)
+    bottom_limit=   min(bottom_limit+margin, rows)
+
+    bottom_line =   graph[left_limit:right_limit][bottom_limit-2*margin:bottom_limit][:]
+    left_line   =   graph[left_limit:left_limit+2*margin][top_limit:bottom_limit][:]
+
+    columns     =   right_limit-left_limit
+    rows        =   bottom_limit-top_limit
+    
+    for a in columns:
+        for b in range (0:10):
+            bottom_histogram[a] = bottom_histogram[a] + min(bottom_line[a][b][:])
+
+    for a in rows:
+        for b in range (0:10):
+            left_histogram[a] = left_histogram[a] + min(left_line[b][a][:])
+
+    ##Ahora buscamos las marquitas. Las marquitas deberian cumplir 3 condiciones:
+    ##Deberían ser no únicas, negras, y de carácter regular.
+    ##Para medir el negro solo, la mejor manera es usando min[:].
+    ##Eso elimina todos los colores con al menos un canal luminoso.
+    ##Ahora, para medir si son únicas o no, debemos usar un hash.
+    bottom_dict = dict()
+    for a in columns:
+        if bottom_histogram[a] in bottom_dict():
+            bottom_dict[bottom_histogram[a]] += 1
+        else:
+            bottom_dict[bottom_histogram[a]] = 1
+
+    left_dict = dict()
+    for a in columns:
+        if left_histogram[a] in left_dict():
+            left_dict[left_histogram[a]] += 1
+        else:
+            left_dict[left_histogram[a]] = 1
+
+    ##Finalmente, regularidad.
+    ##Ignorando singuletes y mayorías, tomamos sólo el 50% más alto,
+    ##y buscamos una manera de 

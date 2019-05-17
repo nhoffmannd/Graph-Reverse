@@ -42,7 +42,8 @@ class Example(QMainWindow):
     def open_file(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file', "", "Image Files (*.jpg *.bmp *.png)")
         workfile = misc.imread(fname[0])
-        print(graph_limits(workfile))
+        box_limits = graph_limits(workfile)
+        
         ##Esto anda.
         
 ##Empecemos.
