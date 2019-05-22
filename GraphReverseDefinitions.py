@@ -93,53 +93,83 @@ def graph_limits(graph):
 
 def find_ticks (graph, limits):
 
-    left_limit  =   limits[1]
-    top_limit   =   limits[2]
-    right_limit =   limits[3]
-    bottom_limit=   limits[4]
+    lf_lm   =   limits[1]
+    tp_lm   =   limits[2]
+    rg_lm   =   limits[3]
+    bt_lm   =   limits[4]
 
-    rows        =   graph.shape[0]
-    columns     =   graph.shape[1]
-    margin      =   5
+    rows    =   graph.shape[0]
+    columns =   graph.shape[1]
+    margin  =   5
     
-    left_limit  =   max(left_limit-margin, 0)
-    right_limit =   min(right_limit+margin, columns)
-    top_limit   =   max(top_limit-margin, 0)
-    bottom_limit=   min(bottom_limit+margin, rows)
+    lf_lm   =   max(lf_lm-margin, 0)
+    rg_lm   =   min(rg_lm+margin, columns)
+    tp_lm   =   max(tp_lm-margin, 0)
+    bt_lm   =   min(bt_lm+margin, rows)
 
-    bottom_line =   graph[left_limit:right_limit][bottom_limit-2*margin:bottom_limit][:]
-    left_line   =   graph[left_limit:left_limit+2*margin][top_limit:bottom_limit][:]
+    bt_ln   =   graph[lf_lm:rg_lm][bt_lm-2*margin:bt_lm][:]
+    lf_ln   =   graph[lf_lm:lf_lm+2*margin][tp_lm:bt_lm][:]
 
-    columns     =   right_limit-left_limit
-    rows        =   bottom_limit-top_limit
+    columns =   rg_lm-lf_lm
+    rows    =   bt_lm-tp_lm
     
     for a in columns:
         for b in range (0:10):
-            bottom_histogram[a] = bottom_histogram[a] + min(bottom_line[a][b][:])
+            bt_hist[a] = bt_hist[a] + min(bt_ln[a][b][:])
 
     for a in rows:
         for b in range (0:10):
-            left_histogram[a] = left_histogram[a] + min(left_line[b][a][:])
+            lf_hist[a] = lf_hist[a] + min(lf_ln[b][a][:])
 
     ##Ahora buscamos las marquitas. Las marquitas deberian cumplir 3 condiciones:
     ##Deberían ser no únicas, negras, y de carácter regular.
     ##Para medir el negro solo, la mejor manera es usando min[:].
     ##Eso elimina todos los colores con al menos un canal luminoso.
     ##Ahora, para medir si son únicas o no, debemos usar un hash.
-    bottom_dict = dict()
+    bt_dc = dict()
     for a in columns:
-        if bottom_histogram[a] in bottom_dict():
-            bottom_dict[bottom_histogram[a]] += 1
+        if bt_hist[a] in bt_dc():
+            bt_dc[bt_hist[a]] += 1
         else:
-            bottom_dict[bottom_histogram[a]] = 1
+            bt_dc[bt_hist[a]] = 1
 
-    left_dict = dict()
-    for a in columns:
-        if left_histogram[a] in left_dict():
-            left_dict[left_histogram[a]] += 1
+    lf_dc = dict()
+    for a in rows:
+        if lf_hist[a] in lf_dc():
+            lf_dc[lf_hist[a]] += 1
         else:
-            left_dict[left_histogram[a]] = 1
+            lf_dc[lf_hist[a]] = 1
 
     ##Finalmente, regularidad.
-    ##Ignorando singuletes y mayorías, tomamos sólo el 50% más alto,
-    ##y buscamos una manera de 
+    ##Ignorando singuletes y mayorías, tomamos sólo el 50% más bajo,
+    ##Con cuatro estoy seguro. Armamos array de 4x2 para posicionarlas.
+
+    marcas = np.array((4,2),0)
+    current_column = 1
+    current_row = 1
+    start_of_tick = 1
+    end_of_tick = 2
+    was_on_a_tick = False
+
+    for a in rows:
+        if not (lf_dc[lf_hist[a]] == max(lf_dc)
+        or lf_dc[lf_hist[a]] < 2
+        or lf_hist[a] < 640):
+            if was_on_a_tick == False:
+                was_on_a_tick = True
+                marcas[current_tick,start_of_tick] = a
+        else:
+            if was_on_a_tick == True:
+                was_on_a_tick = False
+                marcas[current_tick,end_of_tick] = a
+                current_tick += 1
+        if current_tick < 4:
+            break
+
+    for a in columns:
+        if not (bt_dc[bt_hist[a]] == max(bt_dc)
+        or bt_dc[bt_hist[a]] < 2
+        or bt_hist[a] < 640
+        or new_column == True):
+            marcas[current_row] = a
+            
