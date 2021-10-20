@@ -7,6 +7,8 @@
 ##  return explícito
 ##  ESTO NO ES RUBY. RETURN TIENE QUE SER EXPLÍCITO.
 
+
+
 ##Esto acorta la definición de las funciones a 2 líneas, en vez de 4.
 def new_function(ICON, NOMBRE, TECLA, DESC, OBJ, MENU):
     from PyQt5.QtGui import QIcon
@@ -16,15 +18,6 @@ def new_function(ICON, NOMBRE, TECLA, DESC, OBJ, MENU):
     NEW.setStatusTip(DESC)
     MENU.addAction(NEW)
     return NEW
-
-def ejemplo():
-    from scipy import misc
-    path_ejemplo = "C:/Users/Nicolás/Documents/Python/cap1.bmp"
-    workfile = misc.imread(path_ejemplo)
-    box_limits = graph_limits(workfile)
-    print(box_limits)
-    ticks = find_ticks(workfile, box_limits)
-    print(ticks)
 
 ##Esto procesa los límites de los gráficos.
 def graph_limits(graph):
@@ -105,7 +98,6 @@ def dame():
 ##1234567890223456789033345678904444567890555556789066666678907777777890
 ##1234567890223456789033345678904444567890555556789066666678907777777890
 ##1234567890223456789033345678904444567890555556789066666678907777777890
-
 def find_ticks (graph, limits):
     import PIL
     import numpy as np
@@ -149,31 +141,32 @@ def find_ticks (graph, limits):
     ##Para medir el negro solo, la mejor manera es usando max[:].
     ##Eso elimina todos los colores con al menos un canal luminoso.
     ##Ahora, para medir si son únicas o no, debemos usar un hash.
-
     ##bt_dc tiene intensidades, mide las frecuencias d cada intensidad.
-    bt_dc = dict()
-    for a in range(0, columns):
-        if bt_hist[a] in bt_dc:
-            bt_dc[bt_hist[a]] += 1
-        else:
-            bt_dc[bt_hist[a]] = 1
-
-    lf_dc = dict()
-    for a in range(0, rows):
-        if lf_hist[a] in lf_dc:
-            lf_dc[lf_hist[a]] += 1
-        else:
-            lf_dc[lf_hist[a]] = 1
-
     ##Finalmente, regularidad.
-    ##Los singuletes son inevitables, tristemente.
+    ##Los singuletes son inevitables.
     ##La mayoría tiene la línea negra base pasante en el medio.
     ##Todo lo que sea más oscuro que el medio es una marquita.
+    left_ticks = ticks_only(lf_hist, margin) ##, lf_lm)
+    bottom_ticks = ticks_only(bt_hist, margin) ##, tp_lm)
+    ticks_map = {'left': left_ticks, 'bottom': bottom_ticks}
+    return(ticks_map)
+
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##1234567890223456789033345678904444567890555556789066666678907777777890
+def ticks_only(aa_hist, margin, skip=0, invert = False):
+    import numpy as np
+    limit = len(aa_hist)
+
+    bt_dc = dict()
+    for a in range(0, limit):
+        if aa_hist[a] in bt_dc:
+            bt_dc[aa_hist[a]] += 1
+        else:
+            bt_dc[aa_hist[a]] = 1
 
     bt_dcc = bt_dc
     bt_dc = {}
-    lf_dcc = lf_dc
-    lf_dc = {}
 
     current_max = 0
     cutoff_key = 0
@@ -182,18 +175,16 @@ def find_ticks (graph, limits):
         if bt_dcc[key] > current_max:
             current_max = bt_dcc[key]
             cutoff_key = key
-            
+    
     for key in bt_dcc:
         if  key < cutoff_key*0.9:
             bt_dc[key] = bt_dcc[key]
 
-    for key in lf_dcc:
-        if lf_dcc[key] > 1.0:
-            lf_dc[key] = lf_dcc[key];
-
     ##De acá deberíamos tener una regularidad.
-
-    ticks = len(bt_dc)
+    ticks = 0
+    for key in bt_dc:
+        ticks += bt_dc[key]
+    
     marcas = np.zeros((ticks,2))
     current_column = 1
     current_row = 1
@@ -202,15 +193,11 @@ def find_ticks (graph, limits):
     was_on_a_tick = False
     current_tick = 0
 
-    for a in range(0, columns):
-        if bt_hist[a] in bt_dc:
-            marcas[current_tick,0] = a
-            marcas[current_tick, 1] = 2*margin*255 - bt_hist[a]
+    for a in range(0, limit):
+        if aa_hist[a] in bt_dc:
+            marcas[current_tick, 0] = a
+            marcas[current_tick, 1] = 2*margin*255 - aa_hist[a]
             current_tick += 1
-
-    ##hace las rows primero, fijate que funcione,
-    ##luego vemos las cols.
-    ##Bueno, tenemos esto listo.
 
     tick_position = []
     positions_included = 0
@@ -313,6 +300,154 @@ def find_ticks (graph, limits):
             final_tick_values[cur_mult, ticks_col] = cur_tick
             final_tick_values[cur_mult, multi_col] = cur_mult
 
-    return_tick_positions = final_tick_values[:, 0]
+    total = len(final_tick_values)
+
+    if invert:
+        skip = -skip
     
+    for a in range(0, total):
+        b = final_tick_values[a, ticks_col]
+        final_tick_values[a, ticks_col] = b + skip - margin
+    
+    return_tick_positions = final_tick_values[:, 0]    
     return return_tick_positions
+
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##1234567890223456789033345678904444567890555556789066666678907777777890
+def read_bottom(image_path, bb):
+    from PIL import Image
+    from pytesseract_part import tesseract_get
+    wg = Image.open(image_path)
+    bb_left = bb[0]
+    bb_top = bb[3]
+    bb_right = bb[2]
+    bb_bottom = wg.size[1]
+    bottom_slice = wg.crop((bb_left, bb_top, bb_right, bb_bottom))
+    get = tesseract_get(bottom_slice)
+    get = string_a_tabla(get)
+    return get
+    #pasamos a pytesseract_part lo que tiene abajo de la línea.
+
+def read_left(image_path,bb):
+    from PIL import Image
+    from pytesseract_part import tesseract_get, reduced_array
+    wg = Image.open(image_path)
+    bb_left = 46    
+    bb_top = bb[1]
+    bb_right = bb[0]
+    bb_bottom = bb[3]
+    left_slice = wg.crop((bb_left, bb_top, bb_right, bb_bottom))
+    get = tesseract_get(left_slice)
+    get = reduced_array(get)
+    get = puntos_medios(get, {"height":0.5, "top":1})
+    return get
+    #pasamos a pytesseract_part lo que tiene abajo de la línea.
+
+def puntos_medios(arr,direccion):
+    definiciones = arr[0]
+    mult = {}
+    puntos = {}
+    for kk in range(len(definiciones)):
+        if definiciones[kk] in direccion:
+            mult[kk] = direccion[definiciones[kk]]
+        if definiciones[kk] == "text":
+            mult["text"] = kk
+    for kk in range(1,len(arr)):
+        valor = 0
+        for jj in range(len(definiciones)):
+            if jj in mult:
+                valor += int(arr[kk][jj]) * float(mult[jj])
+        texto = arr[kk][mult["text"]]
+        if texto.isdigit():
+            puntos[valor] = arr[kk][mult["text"]]
+    return puntos
+
+def string_a_tabla(string_a_tabla):
+    import numpy as np
+    rows = string_a_tabla.count('\n') + 1
+    cols = string_a_tabla.count('\t')
+    cols = int((cols / rows))+1
+    rows -= 1
+    row = 0
+    col = 0
+    tabla = np.zeros((rows,cols))
+    line = ''
+    char = ''
+    header = {}
+    linepusher = {}
+    last = len(string_a_tabla)
+    for a in range(0,last):
+        char = string_a_tabla[a]
+        if (char == '\n' or char == '\t'):
+            if row == 0:
+                header[col] = line
+            else:
+                if (char == '\n'):
+                    linepusher[row-1] = line
+                else:
+                    if not line == '':
+                        line2 = int(line)
+                        tabla[row-1,col] = line2
+            if (char == '\n'):
+                row += 1
+                col = 0
+            if (char == '\t'):
+                col += 1
+            line = ''
+        else:
+            line += char
+            char = ''
+    linepusher[row-1] = line
+    ##print(header)
+    ##print(linepusher)
+    posiciones = reducir_tabla(tabla, linepusher)
+    return posiciones
+
+def reducir_tabla(tabla, lineas):
+    import numpy as np
+    first = True
+    total = len(lineas)
+    for a in range(0, total):
+        if first:
+            first = False
+            claves  = [False]
+        else:
+            claves += [False]
+    
+    for key in lineas:
+        claves[key] = lineas[key]
+
+    for a in range(0, total):
+        b = total-a-1
+        if (not (claves[b].isnumeric())):
+            del claves[b]
+            tabla = np.delete(tabla, b, 0)
+
+    total = len(claves)
+    posiciones = {}
+    for a in range(0, total):
+        posicion = tabla[a, 6] + tabla[a, 8]/2
+        posiciones[posicion] = claves[a]
+    return posiciones
+
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##1234567890223456789033345678904444567890555556789066666678907777777890
+##Acortame esto de clavarle ejemplo() cada vez que lo toco.
+if __name__ == '__main__':
+    from scipy import misc
+    import imageio
+    path_ejemplo = "C:/Users/Nicolás/Documents/Python/cap1.bmp"
+    workfile = imageio.imread(path_ejemplo)
+    box_limits = graph_limits(workfile)
+    ticks = find_ticks(workfile, box_limits)
+    bt_box = read_bottom(path_ejemplo, box_limits)
+    lf_box = read_left(path_ejemplo, box_limits)
+
+    print(ticks['left'])
+    print(lf_box)
+    print("")
+    print(ticks['bottom'])
+    print(bt_box)
+    
