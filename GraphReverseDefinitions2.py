@@ -387,7 +387,7 @@ def string_a_tabla(string_a_tabla):
                     linepusher[row-1] = line
                 else:
                     if not line == '':
-                        line2 = int(line)
+                        line2 = int(float(line))
                         tabla[row-1,col] = line2
             if (char == '\n'):
                 row += 1
@@ -431,6 +431,29 @@ def reducir_tabla(tabla, lineas):
         posiciones[posicion] = claves[a]
     return posiciones
 
+def fix_ticks(tick_list,correction):
+    left_correction = correction[1]
+    top_correction  = correction[0]
+    corrected_ticks = {}
+    corrected_ticks['left'] = tick_list['left']
+    corrected_ticks['bottom']  = tick_list['bottom']
+    for each in range(len(corrected_ticks['left'])):
+        corrected_ticks['left'][each] += left_correction
+    for each in range(len(corrected_ticks['bottom'])):
+        corrected_ticks['bottom'][each] += top_correction
+    return corrected_ticks
+
+def fix_box(bt_box,lf_box,correction):
+    left_correction = correction[0]
+    top_correction  = correction[1]
+    bt_box_corrected = {}
+    lf_box_corrected = {}
+    for each in bt_box:
+        bt_box_corrected[each + left_correction] = bt_box[each]
+    for each in lf_box:
+        lf_box_corrected[each +  top_correction] = lf_box[each]
+    return bt_box_corrected, lf_box_corrected
+
 ##1234567890223456789033345678904444567890555556789066666678907777777890
 ##1234567890223456789033345678904444567890555556789066666678907777777890
 ##1234567890223456789033345678904444567890555556789066666678907777777890
@@ -438,7 +461,7 @@ def reducir_tabla(tabla, lineas):
 if __name__ == '__main__':
     from scipy import misc
     import imageio
-    path_ejemplo = "C:/Users/Nicolás/Documents/Python/cap1.bmp"
+    path_ejemplo = "C:/Users/Nicolás/Documents/Python/cap1.png"
     workfile = imageio.imread(path_ejemplo)
     box_limits = graph_limits(workfile)
     ticks = find_ticks(workfile, box_limits)

@@ -205,7 +205,7 @@ def visualize_threshold(aa, bb):
 
 ##MAIN.
 if __name__ == '__main__':
-    img = Image.open("C:/Users/Nicolás/Documents/Python/cap1.png")
+    img = Image.open("D:/Python/cap1.png")
     aa = np.array(img)
     schema, histogram = make_schema_and_histogram(aa)
     data_order, data_series = make_list_of_hues(histogram)
